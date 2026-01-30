@@ -68,6 +68,10 @@ app.get("/", (req, res) => {
     <body>
       <h1>RabbitMQ Producer API</h1>
       <div class="form-group">
+        <label>Booking ID:</label>
+        <input type="text" id="bookingId" placeholder="VD: BK123456" />
+      </div>
+      <div class="form-group">
         <label>Message:</label>
         <textarea id="message" rows="4" placeholder="Nhập message của bạn..."></textarea>
       </div>
@@ -76,8 +80,15 @@ app.get("/", (req, res) => {
       
       <script>
         async function sendMessage() {
+          const bookingId = document.getElementById('bookingId').value;
           const message = document.getElementById('message').value;
           const responseDiv = document.getElementById('response');
+          
+          if (!bookingId.trim()) {
+            responseDiv.className = 'response error';
+            responseDiv.textContent = 'Booking ID không được để trống!';
+            return;
+          }
           
           if (!message.trim()) {
             responseDiv.className = 'response error';
@@ -86,10 +97,10 @@ app.get("/", (req, res) => {
           }
           
           try {
-            const res = await fetch('/api/send', {
+            const res = await fetch('/send', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message })
+              body: JSON.stringify({ bookingId, message })
             });
             
             const data = await res.json();
@@ -97,6 +108,7 @@ app.get("/", (req, res) => {
             if (res.ok) {
               responseDiv.className = 'response success';
               responseDiv.textContent = data.message;
+              document.getElementById('bookingId').value = '';
               document.getElementById('message').value = '';
             } else {
               responseDiv.className = 'response error';
@@ -114,7 +126,11 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-  const { message } = req.body;
+  const { bookingId, message } = req.body;
+
+  if (!bookingId || !bookingId.trim()) {
+    return res.status(400).json({ error: "Booking ID không được để trống" });
+  }
 
   if (!message || !message.trim()) {
     return res.status(400).json({ error: "Message không được để trống" });
@@ -126,18 +142,23 @@ app.post("/send", async (req, res) => {
 
   try {
     const queue = "hello_queue";
-    const fullMessage = `${message} - Thời gian: ${new Date().toLocaleString()}`;
 
-    channel.sendToQueue(queue, Buffer.from(fullMessage), {
+    const messageData = {
+      bookingId: bookingId.trim(),
+      message: message.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    channel.sendToQueue(queue, Buffer.from(JSON.stringify(messageData)), {
       persistent: true,
     });
 
-    console.log(`Đã gửi: ${fullMessage}`);
+    console.log(`📤 Đã gửi - Booking ID: ${bookingId}, Message: ${message}`);
 
     res.json({
       success: true,
       message: "Message đã được gửi thành công!",
-      sentMessage: fullMessage,
+      sentData: messageData,
     });
   } catch (error) {
     res.status(500).json({ error: "Sending message error: " + error.message });

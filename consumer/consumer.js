@@ -36,7 +36,18 @@ async function receiveMessage() {
   channel.consume(queue, (msg) => {
     if (msg !== null) {
       const content = msg.content.toString();
-      console.log(`Đã nhận: ${content}`);
+
+      try {
+        const messageData = JSON.parse(content);
+        console.log(`Booking ID: ${messageData.bookingId}`);
+        console.log(`Message: ${messageData.message}`);
+        console.log(
+          `🕐 Timestamp: ${new Date(messageData.timestamp).toLocaleString()}`,
+        );
+      } catch (error) {
+        // Nếu không phải JSON, hiển thị như text thông thường
+        console.log(`📥 Đã nhận (text): ${content}`);
+      }
 
       channel.ack(msg);
     }
