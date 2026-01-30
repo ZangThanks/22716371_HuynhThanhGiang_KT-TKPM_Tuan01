@@ -1,0 +1,12 @@
+{
+  "name": "rabbitmq-consumer",
+  "version": "1.0.0",
+  "description": "RabbitMQ Consumer - Receive messages",
+  "main": "consumer.js",
+  "scripts": {
+    "start": "node consumer.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  }
+}
