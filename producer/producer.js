@@ -25,7 +25,7 @@ async function connectRabbitMQ() {
       console.log("Kết nối RabbitMQ thành công!");
 
       channel = await connection.createChannel();
-      const queue = "hello_queue";
+      const queue = "booking_queue";
 
       await channel.assertQueue(queue, {
         durable: true,

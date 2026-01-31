@@ -4,7 +4,7 @@
   "description": "RabbitMQ Producer - Send messages",
   "main": "producer.js",
   "scripts": {
-    "start": "node producer.js"
+    "start": "node producer_dlq.js"
   },
   "dependencies": {
     "amqplib": "^0.10.3",

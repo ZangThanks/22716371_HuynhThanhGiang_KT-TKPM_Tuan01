@@ -24,16 +24,15 @@ async function receiveMessage() {
   }
 
   const channel = await connection.createChannel();
-  const queue = "hello_queue";
+  const queue = "booking_queue";
 
   await channel.assertQueue(queue, {
     durable: true,
   });
 
   console.log("Consumer đang chờ nhận messages...");
-  console.log("Nhấn CTRL+C để thoát\n");
 
-  channel.consume(queue, (msg) => {
+  channel.consume(queue, async (msg) => {
     if (msg !== null) {
       const content = msg.content.toString();
 
@@ -42,11 +41,10 @@ async function receiveMessage() {
         console.log(`Booking ID: ${messageData.bookingId}`);
         console.log(`Message: ${messageData.message}`);
         console.log(
-          `🕐 Timestamp: ${new Date(messageData.timestamp).toLocaleString()}`,
+          `Timestamp: ${new Date(messageData.timestamp).toLocaleString()}`,
         );
       } catch (error) {
-        // Nếu không phải JSON, hiển thị như text thông thường
-        console.log(`📥 Đã nhận (text): ${content}`);
+        console.log(`Đã nhận (text): ${content}`);
       }
 
       channel.ack(msg);
